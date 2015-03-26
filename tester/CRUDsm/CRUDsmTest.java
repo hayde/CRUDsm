@@ -65,14 +65,16 @@ public class CRUDsmTest extends javax.swing.JFrame {
         }
 
         @Override
-        public Long actionSave() {
+        public CRUDTuple actionSave() {
+            CRUDTuple returnValue = null; 
             if (chkSimulateDBError.isSelected()) {
                 return null;
             } else {
                 if (getCurrentObject().id == null || getCurrentObject().id == 0l) {
                     this.getCurrentObject().id = new Date().getTime();
+                    returnValue = new CRUDTuple(this.getCurrentObject().id, this.getCurrentObject());
                 }
-                return this.getCurrentObject().id;
+                return returnValue;
             }
         }
 
@@ -147,9 +149,11 @@ public class CRUDsmTest extends javax.swing.JFrame {
         public void actionRemovedOrAdded(CRUDEvents event, Contact workingObject) {
             if (event == CRUDEvents.INITIALIZE) {
                 lstObjects.setModel(model);
-            } else if (event == CRUDEvents.DELETE) {
+            } 
+            else if (event == CRUDEvents.DELETE) {
                 model.removeElement(workingObject);
-            } else if (event == CRUDEvents.SAVE) {
+            } 
+            else if (event == CRUDEvents.SAVE) {
                 model.addElement(workingObject);
                 lstObjects.setSelectedValue(workingObject, true);
             }
