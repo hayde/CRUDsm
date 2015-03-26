@@ -15,12 +15,13 @@ import java.util.Set;
  * @date	2012/07/02
  */
 public abstract class CRUDsm<CRUDID, CRUDObject> {
-    
+
     public class CRUDTuple {
+
         public CRUDID id;
         public CRUDObject object;
-        
-        public CRUDTuple( CRUDID id, CRUDObject object ) {
+
+        public CRUDTuple(CRUDID id, CRUDObject object) {
             this.id = id;
             this.object = object;
         }
@@ -283,7 +284,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
 
                 case SAVE: {
                     CRUDTuple newObject = null;
-                    newObject = actionSave();
+                    newObject = actionSave(this.currentElement);
                     if (newObject == null) {
                         returnValue = false;
                     }
@@ -294,7 +295,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                             // already existing in the list, so replace the 
                             // object with the new one
                             objects.put(newObject.id, newObject.object);
-                            
+
                         }
                         else {
                             // this element is new to the system
@@ -360,7 +361,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                             changeFlag = false;
                         }
                         else {
-                            if (actionDelete()) {
+                            if (actionDelete(this.currentElement)) {
                                 objects.remove(currentID);
 
                                 // store the delete element for selection purpose (so the 
@@ -384,7 +385,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                     break;
 
                 case REFRESHVIEW:
-                    actionRefreshView();
+                    actionRefreshView(this.currentElement);
                     break;
 
                 case VALIDATING:
@@ -467,22 +468,22 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
      *
      * So you finally will delete the current working object
      */
-    public abstract boolean actionDelete();
+    public abstract boolean actionDelete(CRUDObject crudo);
 
     /**
      * You should here take care, to save the object.
      */
-    public abstract CRUDTuple actionSave();
+    public abstract CRUDTuple actionSave(CRUDObject crudo);
 
     /**
      *
      */
-    public abstract boolean actionValidate(CRUDObject object);
+    public abstract boolean actionValidate(CRUDObject crudo);
 
     public abstract CRUDID actionSelected();
 
-    public abstract void actionRefreshView();
+    public abstract void actionRefreshView(CRUDObject crudo);
 
-    public abstract void actionRemovedOrAdded(CRUDEvents event, CRUDObject workingObject);
+    public abstract void actionRemovedOrAdded(CRUDEvents event, CRUDObject crudo);
     //</editor-fold>
 }

@@ -7,8 +7,10 @@
 package CRUDsm;
 
 import eu.hayde.box.gui.CRUDsm;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.DefaultListModel;
 
 /**
@@ -38,8 +40,12 @@ public class CRUDsmTest extends javax.swing.JFrame {
     private CRUDsm theCRUDOBjectHandler = new CRUDsm<Long, Contact>() {
         @Override
         public HashMap<Long, Contact> actionInit() {
+            // set to autosave
+            //this.setAutomaticSave(true);
+
             // fill the objects
             return new HashMap<Long, Contact>();
+            
         }
 
         @Override
@@ -56,23 +62,27 @@ public class CRUDsmTest extends javax.swing.JFrame {
         }
 
         @Override
-        public boolean actionDelete() {
+        public boolean actionDelete(Contact object) {
             if (chkSimulateDBError.isSelected()) {
                 return false;
-            } else {
+            }
+            else {
                 return true;
             }
         }
 
         @Override
-        public CRUDTuple actionSave() {
-            CRUDTuple returnValue = null; 
+        public CRUDTuple actionSave(Contact object) {
+            CRUDTuple returnValue = null;
             if (chkSimulateDBError.isSelected()) {
                 return null;
-            } else {
+            }
+            else {
                 if (getCurrentObject().id == null || getCurrentObject().id == 0l) {
-                    this.getCurrentObject().id = new Date().getTime();
-                    returnValue = new CRUDTuple(this.getCurrentObject().id, this.getCurrentObject());
+                    object.id = new Date().getTime();
+                    returnValue = new CRUDTuple(object.id, object);
+                } else {
+                    returnValue = new CRUDTuple( object.id, object);
                 }
                 return returnValue;
             }
@@ -94,7 +104,8 @@ public class CRUDsmTest extends javax.swing.JFrame {
             if (errorMsg.length() > 0) {
                 lblErrorMsg.setText("<html>" + errorMsg + "</html>");
                 return false;
-            } else {
+            }
+            else {
                 lblErrorMsg.setText("");
                 object.firstname = txtFirstname.getText();
                 object.lastname = txtLastname.getText();
@@ -110,10 +121,9 @@ public class CRUDsmTest extends javax.swing.JFrame {
         }
 
         @Override
-        public void actionRefreshView() {
-            Contact user = this.getCurrentObject();
-
-            if (user == null) {
+        public void actionRefreshView(Contact object) {
+            
+            if (object == null) {
                 txtFirstname.setText("");
                 txtFirstname.setEnabled(false);
 
@@ -127,15 +137,16 @@ public class CRUDsmTest extends javax.swing.JFrame {
                 btnSave.setEnabled(false);
                 btnNew.setEnabled(true);
 
-            } else {
-                lstObjects.setSelectedValue(user, true);
-                txtFirstname.setText(user.firstname);
+            }
+            else {
+                lstObjects.setSelectedValue(object, true);
+                txtFirstname.setText(object.firstname);
                 txtFirstname.setEnabled(true);
 
-                txtLastname.setText(user.lastname);
+                txtLastname.setText(object.lastname);
                 txtLastname.setEnabled(true);
 
-                txtEmail.setText(user.email);
+                txtEmail.setText(object.email);
                 txtEmail.setEnabled(true);
 
                 btnDelete.setEnabled(true);
@@ -146,18 +157,20 @@ public class CRUDsmTest extends javax.swing.JFrame {
         }
 
         @Override
-        public void actionRemovedOrAdded(CRUDEvents event, Contact workingObject) {
+        public void actionRemovedOrAdded(CRUDsm.CRUDEvents event, Contact crudo) {
+            //List<Contact> elements = new ArrayList<Contact>(crudoObjects.values());
+            //System.out.println("Size : " + elements.size());
+            //List<Contact> listaa = new ArrayList<Contact>(crudoObjects.values()); 
             if (event == CRUDEvents.INITIALIZE) {
                 lstObjects.setModel(model);
-            } 
-            else if (event == CRUDEvents.DELETE) {
-                model.removeElement(workingObject);
-            } 
-            else if (event == CRUDEvents.SAVE) {
-                model.addElement(workingObject);
-                lstObjects.setSelectedValue(workingObject, true);
             }
-
+            else if (event == CRUDEvents.DELETE) {
+                model.removeElement(crudo);
+            }
+            else if (event == CRUDEvents.SAVE) {
+                model.addElement(crudo);
+                lstObjects.setSelectedValue(crudo, true);
+            }
         }
     };
     //</editor-fold>
@@ -166,6 +179,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
      * Creates new form CRUD2Test
      */
     public CRUDsmTest() {
+        
         initComponents();
     }
 
@@ -353,37 +367,37 @@ public class CRUDsmTest extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 	private void chkSimulateDBErrorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSimulateDBErrorActionPerformed
-        // TODO add your handling code here:
+            // TODO add your handling code here:
 	}//GEN-LAST:event_chkSimulateDBErrorActionPerformed
 
 	private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
-        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CLOSING);
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CLOSING);
 	}//GEN-LAST:event_btnCloseActionPerformed
 
 	private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SAVE);
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SAVE);
 	}//GEN-LAST:event_btnSaveActionPerformed
 
 	private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.INITIALIZE);
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.INITIALIZE);
 	}//GEN-LAST:event_formWindowOpened
 
 	private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.DELETE);
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.DELETE);
 	}//GEN-LAST:event_btnDeleteActionPerformed
 
 	private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
-        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.NEW);
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.NEW);
 	}//GEN-LAST:event_btnNewActionPerformed
 
 	private void lstObjectsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstObjectsValueChanged
-        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SELECT);
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SELECT);
 	}//GEN-LAST:event_lstObjectsValueChanged
 
 	private void txtKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtKeyTyped
-        if (!theCRUDOBjectHandler.isChanged()) {
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CHANGED);
-        }
+            if (!theCRUDOBjectHandler.isChanged()) {
+                theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CHANGED);
+            }
 	}//GEN-LAST:event_txtKeyTyped
 
     /**
