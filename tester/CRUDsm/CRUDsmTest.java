@@ -78,7 +78,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
                 return null;
             }
             else {
-                if (getCurrentObject().id == null || getCurrentObject().id == 0l) {
+                if (object.id == null || object.id == 0l) {
                     object.id = new Date().getTime();
                     returnValue = new CRUDTuple(object.id, object);
                 } else {
