@@ -31,13 +31,27 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
     }
 
     private enum stateMachine {
+        // neccessary for the road-map of the internal state machine
 
-        INITIALIZE, NOTHING_SELECTED, PRESELECTED, SELECTED, NEW, CHANGED, SAVE, AUTOMATICSAVE, DELETE, REFRESHVIEW, VALIDATING, SELECTIONLISTCHANGED
+        INITIALIZE,
+        NOTHING_SELECTED,
+        PRESELECTED,
+        SELECTED,
+        NEW,
+        CHANGED,
+        SAVE,
+        AUTOMATICSAVE,
+        DELETE,
+        REFRESHVIEW,
+        VALIDATING,
+        SELECTIONLISTCHANGED,
+        INIT_SEARCH,
+        SEARCH
     }
 
     public enum CRUDEvents {
 
-        INITIALIZE, NEW, SELECT, SAVE, DELETE, CHANGED, CLOSING
+        INITIALIZE, NEW, SELECT, SAVE, DELETE, CHANGED, CLOSING, INIT_SEARCH, SEARCH
     }
     /**
      * here we store the list of objects, we are going to work with.
@@ -47,16 +61,17 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
      * here we store only the key id of the current element. a null will
      * indicate for all functions, that nothing is selected.
      */
-    private CRUDObject currentElement = null;
-    private CRUDID currentID = null;
+    protected CRUDObject currentElement = null;
+    protected CRUDID currentID = null;
+    protected CRUDObject deletedOrAddedElement = null;
+    protected CRUDID selectedButNotCurrentID = null;
+    protected boolean initialized = false;
+    protected boolean changeFlag = false;
+    protected boolean isInSearch = false;
+    protected boolean internalRefreshState = false;
+    protected boolean bAutomaticSaveActivated = false;
+    protected CRUDModelListener ModelListener = null;
     private CRUDEvents currentEvent = null;
-    private CRUDObject deletedOrAddedElement = null;
-    private CRUDID selectedButNotCurrentID = null;
-    private boolean initialized = false;
-    private boolean changeFlag = false;
-    private boolean internalRefreshState = false;
-    private boolean bAutomaticSaveActivated = false;
-    private CRUDModelListener ModelListener = null;
 
     /**
      * the constructor, which expects the objects in hashmap format to reach the
@@ -69,6 +84,10 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
 
     public boolean isChanged() {
         return changeFlag;
+    }
+
+    public boolean isInSearch() {
+        return isInSearch;
     }
 
     public CRUDObject getCurrentObject() {
@@ -138,13 +157,13 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
         if (internalRefreshState) {
             // the user fired a new event inside the action handlers. that is not allowed
             // ==> do nothing!
-        }
-        else {
+        } else {
             try {
                 List<stateMachine> roadmap = new ArrayList<stateMachine>();
 
                 internalRefreshState = true;
                 currentEvent = newEvent;
+                isInSearch = false;
                 deletedOrAddedElement = null;
 
 
@@ -202,12 +221,26 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                             roadmap.add(stateMachine.REFRESHVIEW);
                         }
                         break;
+                    case INIT_SEARCH:
+                        if (changeFlag) {
+                            roadmap.add(stateMachine.AUTOMATICSAVE);
+                            roadmap.add(stateMachine.REFRESHVIEW);
+                        }
+                        roadmap.add(stateMachine.INIT_SEARCH);
+                        isInSearch = true;
+                        break;
+                    case SEARCH:
+                        roadmap.add(stateMachine.SEARCH);
+                        roadmap.add(stateMachine.SELECTIONLISTCHANGED);
+                        roadmap.add(stateMachine.NOTHING_SELECTED);
+                        roadmap.add(stateMachine.REFRESHVIEW);
+                        break;
+
                 }
 
                 returnValue = process(roadmap);
 
-            }
-            finally {
+            } finally {
                 internalRefreshState = false;
                 currentEvent = newEvent;
                 deletedOrAddedElement = null;
@@ -234,8 +267,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                     this.objects = actionInit();
                     if (objects == null) {
                         returnValue = false;
-                    }
-                    else {
+                    } else {
                         returnValue = true;
                     }
                     break;
@@ -256,8 +288,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                     currentID = selectedButNotCurrentID;
                     if (currentID != null && objects.containsKey(currentID)) {
                         currentElement = objects.get(currentID);
-                    }
-                    else {
+                    } else {
                         currentElement = null;
                         currentID = null;
                     }
@@ -269,8 +300,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                     currentID = null;
                     if (currentElement == null) {
                         returnValue = false;
-                    }
-                    else {
+                    } else {
                         returnValue = true;
                     }
                 }
@@ -287,8 +317,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                     newObject = actionSave(this.currentElement);
                     if (newObject == null) {
                         returnValue = false;
-                    }
-                    else {
+                    } else {
                         returnValue = true;
                         changeFlag = false;
                         if (objects.containsKey(newObject.id)) {
@@ -296,8 +325,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                             // object with the new one
                             objects.put(newObject.id, newObject.object);
 
-                        }
-                        else {
+                        } else {
                             // this element is new to the system
                             // so put it it
                             objects.put(newObject.id, newObject.object);
@@ -323,8 +351,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                         roadmap.add(1, stateMachine.SAVE);
                         roadmap.add(1, stateMachine.VALIDATING);
 
-                    }
-                    else {
+                    } else {
                         CRUD_ACTION_AUTOMATED_SAVE saveIt = actionAutomaticSave();
 
                         if (saveIt == CRUD_ACTION_AUTOMATED_SAVE.SAVE) {
@@ -334,13 +361,11 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                             roadmap.add(1, stateMachine.VALIDATING);
                             returnValue = true;
 
-                        }
-                        else {
+                        } else {
                             if (saveIt == CRUD_ACTION_AUTOMATED_SAVE.CANCEL) {
                                 returnValue = false;
 
-                            }
-                            else {
+                            } else {
                                 if (saveIt == CRUD_ACTION_AUTOMATED_SAVE.DISCARD) {
                                     changeFlag = false;
                                     returnValue = true;
@@ -352,15 +377,13 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                 case DELETE:
                     if (actionDeleteOrCancel() != CRUD_ACTION_DELETE_OR_CANCEL.DELETE) {
                         returnValue = false;
-                    }
-                    else {
+                    } else {
                         if (currentID == null) {
                             // this was a new entry, so you have nothing to delete
                             // realy. just throw the info away!
                             returnValue = true;
                             changeFlag = false;
-                        }
-                        else {
+                        } else {
                             if (actionDelete(this.currentElement)) {
                                 objects.remove(currentID);
 
@@ -376,8 +399,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
 
                                 roadmap.add(1, stateMachine.SELECTIONLISTCHANGED);
 
-                            }
-                            else {
+                            } else {
                                 returnValue = false;
                             }
                         }
@@ -391,8 +413,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                 case VALIDATING:
                     if (actionValidate(this.currentElement)) {
                         returnValue = true;
-                    }
-                    else {
+                    } else {
                         returnValue = false;
                     }
                     break;
@@ -400,6 +421,18 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                 case SELECTIONLISTCHANGED:
                     actionRemovedOrAdded(currentEvent, deletedOrAddedElement);
                     break;
+                case INIT_SEARCH:
+                    actionInitSearch();
+                    break;
+                case SEARCH:
+                    this.objects = actionSearch();
+                    if (objects == null) {
+                        returnValue = false;
+                    } else {
+                        returnValue = true;
+                    }
+                    break;
+
 
             }
 
@@ -415,7 +448,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
      *
      * @return CRUD_ACTION_AUTOMATED_SAVE
      */
-    private CRUD_ACTION_AUTOMATED_SAVE actionAutomaticSave() {
+    protected CRUD_ACTION_AUTOMATED_SAVE actionAutomaticSave() {
         if (ModelListener == null) {
             ModelListener = new DefaultCRUDModelListener();
         }
@@ -427,7 +460,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
      *
      * @return CRUD_ACTION_DELETE_OR_CANCEL
      */
-    private CRUD_ACTION_DELETE_OR_CANCEL actionDeleteOrCancel() {
+    protected CRUD_ACTION_DELETE_OR_CANCEL actionDeleteOrCancel() {
         if (ModelListener == null) {
             // create a new default listener and use that one!
             ModelListener = new DefaultCRUDModelListener();
@@ -485,5 +518,9 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
     public abstract void actionRefreshView(CRUDObject crudo);
 
     public abstract void actionRemovedOrAdded(CRUDEvents event, CRUDObject crudo);
+
+    public abstract void actionInitSearch();
+
+    public abstract HashMap<CRUDID, CRUDObject> actionSearch();
     //</editor-fold>
 }

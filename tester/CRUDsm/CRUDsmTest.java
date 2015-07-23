@@ -7,10 +7,8 @@
 package CRUDsm;
 
 import eu.hayde.box.gui.CRUDsm;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import javax.swing.DefaultListModel;
 
 /**
@@ -36,6 +34,16 @@ public class CRUDsmTest extends javax.swing.JFrame {
         public String toString() {
             return lastname + ", " + firstname;
         }
+
+        public Contact(Long id, String firstname, String lastname, String eMail) {
+            this.id = id;
+            this.firstname = firstname;
+            this.lastname = lastname;
+            this.email = email;
+        }
+
+        public Contact() {
+        }
     }
     private CRUDsm theCRUDOBjectHandler = new CRUDsm<Long, Contact>() {
         @Override
@@ -45,7 +53,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
 
             // fill the objects
             return new HashMap<Long, Contact>();
-            
+
         }
 
         @Override
@@ -65,8 +73,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
         public boolean actionDelete(Contact object) {
             if (chkSimulateDBError.isSelected()) {
                 return false;
-            }
-            else {
+            } else {
                 return true;
             }
         }
@@ -76,13 +83,12 @@ public class CRUDsmTest extends javax.swing.JFrame {
             CRUDTuple returnValue = null;
             if (chkSimulateDBError.isSelected()) {
                 return null;
-            }
-            else {
+            } else {
                 if (object.id == null || object.id == 0l) {
                     object.id = new Date().getTime();
                     returnValue = new CRUDTuple(object.id, object);
                 } else {
-                    returnValue = new CRUDTuple( object.id, object);
+                    returnValue = new CRUDTuple(object.id, object);
                 }
                 return returnValue;
             }
@@ -104,8 +110,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
             if (errorMsg.length() > 0) {
                 lblErrorMsg.setText("<html>" + errorMsg + "</html>");
                 return false;
-            }
-            else {
+            } else {
                 lblErrorMsg.setText("");
                 object.firstname = txtFirstname.getText();
                 object.lastname = txtLastname.getText();
@@ -122,7 +127,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
 
         @Override
         public void actionRefreshView(Contact object) {
-            
+
             if (object == null) {
                 txtFirstname.setText("");
                 txtFirstname.setEnabled(false);
@@ -137,8 +142,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
                 btnSave.setEnabled(false);
                 btnNew.setEnabled(true);
 
-            }
-            else {
+            } else {
                 lstObjects.setSelectedValue(object, true);
                 txtFirstname.setText(object.firstname);
                 txtFirstname.setEnabled(true);
@@ -163,14 +167,32 @@ public class CRUDsmTest extends javax.swing.JFrame {
             //List<Contact> listaa = new ArrayList<Contact>(crudoObjects.values()); 
             if (event == CRUDEvents.INITIALIZE) {
                 lstObjects.setModel(model);
-            }
-            else if (event == CRUDEvents.DELETE) {
+            } else if (event == CRUDEvents.DELETE) {
                 model.removeElement(crudo);
-            }
-            else if (event == CRUDEvents.SAVE) {
+            } else if (event == CRUDEvents.SAVE) {
                 model.addElement(crudo);
                 lstObjects.setSelectedValue(crudo, true);
             }
+        }
+
+        @Override
+        public void actionInitSearch() {
+            // init search is ...
+            btnSave.setEnabled(false);
+            btnDelete.setEnabled(false);
+            btnNew.setEnabled(false);
+        }
+
+        @Override
+        public HashMap<Long, Contact> actionSearch() {
+            // and here we place the complete list to search ... or better
+            // the sql request to generate the list.
+            // fill the objects
+            HashMap<Long, Contact> ReturnValue = new HashMap<Long, Contact>();
+            ReturnValue.put(1l, new Contact(1l, "Bilal", "Hassan", "bilal@hassan.org"));
+            ReturnValue.put(2l, new Contact(2l, "Can", "Senturk", "can@senturk.org"));
+
+            return ReturnValue;
         }
     };
     //</editor-fold>
@@ -179,7 +201,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
      * Creates new form CRUD2Test
      */
     public CRUDsmTest() {
-        
+
         initComponents();
     }
 
@@ -207,6 +229,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
         chkSimulateDBError = new javax.swing.JCheckBox();
         lblExplanation = new javax.swing.JLabel();
         lblErrorMsg = new javax.swing.JLabel();
+        btnSearch = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -296,6 +319,13 @@ public class CRUDsmTest extends javax.swing.JFrame {
         lblErrorMsg.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         lblErrorMsg.setOpaque(true);
 
+        btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -303,9 +333,13 @@ public class CRUDsmTest extends javax.swing.JFrame {
             .add(layout.createSequentialGroup()
                 .addContainerGap()
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, layout.createSequentialGroup()
-                        .add(chkSimulateDBError)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 212, Short.MAX_VALUE)
+                    .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 211, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(chkSimulateDBError))
+                .add(18, 18, 18)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(layout.createSequentialGroup()
+                        .add(btnSearch)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 39, Short.MAX_VALUE)
                         .add(btnNew)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnDelete)
@@ -313,23 +347,20 @@ public class CRUDsmTest extends javax.swing.JFrame {
                         .add(btnSave)
                         .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                         .add(btnClose))
-                    .add(layout.createSequentialGroup()
-                        .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 211, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(18, 18, 18)
-                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                            .add(layout.createSequentialGroup()
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                                    .add(lblFirstname)
-                                    .add(lblLastname)
-                                    .add(lblEmail))
-                                .add(35, 35, 35)
-                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                                    .add(txtFirstname, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
-                                    .add(txtLastname)
-                                    .add(txtEmail))
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(lblExplanation))
-                            .add(lblErrorMsg, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                        .add(layout.createSequentialGroup()
+                            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                .add(lblFirstname)
+                                .add(lblLastname)
+                                .add(lblEmail))
+                            .add(35, 35, 35)
+                            .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                                .add(txtFirstname, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+                                .add(txtLastname)
+                                .add(txtEmail))
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                            .add(lblExplanation))
+                        .add(lblErrorMsg, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -359,7 +390,8 @@ public class CRUDsmTest extends javax.swing.JFrame {
                     .add(btnSave)
                     .add(btnDelete)
                     .add(btnNew)
-                    .add(chkSimulateDBError))
+                    .add(chkSimulateDBError)
+                    .add(btnSearch))
                 .addContainerGap())
         );
 
@@ -367,38 +399,48 @@ public class CRUDsmTest extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
 	private void chkSimulateDBErrorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSimulateDBErrorActionPerformed
-            // TODO add your handling code here:
+        // TODO add your handling code here:
 	}//GEN-LAST:event_chkSimulateDBErrorActionPerformed
 
 	private void btnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseActionPerformed
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CLOSING);
+        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CLOSING);
 	}//GEN-LAST:event_btnCloseActionPerformed
 
 	private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SAVE);
+        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SAVE);
 	}//GEN-LAST:event_btnSaveActionPerformed
 
 	private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.INITIALIZE);
+        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.INITIALIZE);
 	}//GEN-LAST:event_formWindowOpened
 
 	private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.DELETE);
+        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.DELETE);
 	}//GEN-LAST:event_btnDeleteActionPerformed
 
 	private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.NEW);
+        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.NEW);
 	}//GEN-LAST:event_btnNewActionPerformed
 
 	private void lstObjectsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstObjectsValueChanged
-            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SELECT);
+        theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SELECT);
 	}//GEN-LAST:event_lstObjectsValueChanged
 
 	private void txtKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtKeyTyped
-            if (!theCRUDOBjectHandler.isChanged()) {
-                theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CHANGED);
-            }
+        if (!theCRUDOBjectHandler.isChanged()) {
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.CHANGED);
+        }
 	}//GEN-LAST:event_txtKeyTyped
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        if (!theCRUDOBjectHandler.isInSearch()) {
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.INIT_SEARCH);
+        } else {
+            theCRUDOBjectHandler.event(CRUDsm.CRUDEvents.SEARCH);
+        }
+
+
+    }//GEN-LAST:event_btnSearchActionPerformed
 
     /**
      * @param args the command line arguments
@@ -415,6 +457,7 @@ public class CRUDsmTest extends javax.swing.JFrame {
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSearch;
     private javax.swing.JCheckBox chkSimulateDBError;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblEmail;
