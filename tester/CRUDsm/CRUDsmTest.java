@@ -7,8 +7,10 @@
 package CRUDsm;
 
 import eu.hayde.box.gui.CRUDsm;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.DefaultListModel;
 
 /**
@@ -165,22 +167,38 @@ public class CRUDsmTest extends javax.swing.JFrame {
             //List<Contact> elements = new ArrayList<Contact>(crudoObjects.values());
             //System.out.println("Size : " + elements.size());
             //List<Contact> listaa = new ArrayList<Contact>(crudoObjects.values()); 
-            if (event == CRUDEvents.INITIALIZE) {
+            if (event == CRUDEvents.INITIALIZE || event == CRUDEvents.SEARCH) {
+
+                model.removeAllElements();
+                List<Contact> elements = new ArrayList<Contact>(this.getObjects().values());
+
+                // Initialize the Model 
+                for (Contact contact : elements) {
+                    model.addElement(contact);
+                }
+
                 lstObjects.setModel(model);
             } else if (event == CRUDEvents.DELETE) {
                 model.removeElement(crudo);
             } else if (event == CRUDEvents.SAVE) {
                 model.addElement(crudo);
                 lstObjects.setSelectedValue(crudo, true);
+            } else {
+                throw new Error("unknown remove event! ");
             }
         }
 
         @Override
         public void actionInitSearch() {
             // init search is ...
+            txtFirstname.setEnabled(true);
+            txtLastname.setEnabled(true);
+            txtEmail.setEnabled(true);
+
             btnSave.setEnabled(false);
             btnDelete.setEnabled(false);
             btnNew.setEnabled(false);
+
         }
 
         @Override

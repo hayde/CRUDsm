@@ -163,7 +163,6 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
 
                 internalRefreshState = true;
                 currentEvent = newEvent;
-                isInSearch = false;
                 deletedOrAddedElement = null;
 
 
@@ -210,7 +209,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                         break;
 
                     case CHANGED:
-                        if (!changeFlag) {
+                        if (!isInSearch && !changeFlag) {
                             roadmap.add(stateMachine.CHANGED);
                         }
 
@@ -234,6 +233,7 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                         roadmap.add(stateMachine.SELECTIONLISTCHANGED);
                         roadmap.add(stateMachine.NOTHING_SELECTED);
                         roadmap.add(stateMachine.REFRESHVIEW);
+                        isInSearch = false;
                         break;
 
                 }
