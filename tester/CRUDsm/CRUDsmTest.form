@@ -33,10 +33,12 @@
                   <Component id="chkSimulateDBError" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Group type="102" attributes="0">
                       <Component id="btnSearch" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="39" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="btnInitiateSearch" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="btnNew" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnDelete" min="-2" max="-2" attributes="0"/>
@@ -45,24 +47,22 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnClose" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="lblFirstname" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblLastname" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblEmail" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="txtFirstname" alignment="0" pref="208" max="32767" attributes="1"/>
-                              <Component id="txtLastname" alignment="0" max="32767" attributes="1"/>
-                              <Component id="txtEmail" alignment="0" max="32767" attributes="1"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="lblExplanation" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="lblFirstname" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblLastname" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblEmail" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="lblErrorMsg" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="txtFirstname" alignment="0" pref="208" max="32767" attributes="1"/>
+                          <Component id="txtLastname" alignment="0" max="32767" attributes="1"/>
+                          <Component id="txtEmail" alignment="0" max="32767" attributes="1"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="lblExplanation" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="lblErrorMsg" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -102,6 +102,7 @@
                   <Component id="btnNew" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="chkSimulateDBError" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnSearch" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnInitiateSearch" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -238,6 +239,14 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSearchActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnInitiateSearch">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Initiate Search"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInitiateSearchActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

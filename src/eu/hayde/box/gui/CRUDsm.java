@@ -209,7 +209,14 @@ public abstract class CRUDsm<CRUDID, CRUDObject> {
                         break;
 
                     case CHANGED:
-                        if (!isInSearch && !changeFlag) {
+                        if( isInSearch==false && changeFlag==false ) {
+                            /*
+                             *  search   flag  result
+                             *    0        0     1
+                             *    1        0     0
+                             *    0        1     0
+                             *    1        1     => should never happen: but 0
+                             */
                             roadmap.add(stateMachine.CHANGED);
                         }
 
